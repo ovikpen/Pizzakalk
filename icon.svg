@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#2f6a45"/>
+  <circle cx="256" cy="270" r="170" fill="#f1e6cf"/>
+  <circle cx="256" cy="270" r="170" fill="none" stroke="#d9b98a" stroke-width="18"/>
+  <circle cx="190" cy="220" r="14" fill="#7a3b1d"/>
+  <circle cx="318" cy="300" r="11" fill="#7a3b1d"/>
+  <circle cx="232" cy="352" r="9" fill="#7a3b1d"/>
+  <circle cx="330" cy="206" r="8" fill="#7a3b1d"/>
+  <text x="256" y="112" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="64" fill="#f5f4ef">DEG</text>
+</svg>

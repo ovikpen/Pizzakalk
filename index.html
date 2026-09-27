@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Degkalkyl">
+<meta name="theme-color" content="#f5f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171611" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<!--ART-HEAD-->
+<title>Napoletana-degen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f5f4ef;
+  --surface: #ffffff;
+  --surface-2: #ecebe4;
+  --ink: #1e211d;
+  --ink-2: #555a52;
+  --line: #d9d8cf;
+  --accent: #2f6a45;
+  --accent-ink: #ffffff;
+  --accent-soft: #dfeadf;
+  --char: #7a3b1d;
+  --warn-bg: #fbf0d9;
+  --warn-ink: #6b4a0c;
+  --done: #8b9088;
+  --radius: 14px;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Public Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171611;
+    --surface: #211f19;
+    --surface-2: #2b2921;
+    --ink: #eeebe2;
+    --ink-2: #a9a598;
+    --line: #3a372e;
+    --accent: #86c29a;
+    --accent-ink: #10150f;
+    --accent-soft: #24352a;
+    --char: #e0a07e;
+    --warn-bg: #3a2f17;
+    --warn-ink: #f0d49a;
+    --done: #6f6c62;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171611;
+  --surface: #211f19;
+  --surface-2: #2b2921;
+  --ink: #eeebe2;
+  --ink-2: #a9a598;
+  --line: #3a372e;
+  --accent: #86c29a;
+  --accent-ink: #10150f;
+  --accent-soft: #24352a;
+  --char: #e0a07e;
+  --warn-bg: #3a2f17;
+  --warn-ink: #f0d49a;
+  --done: #6f6c62;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--body);
+  padding-inline: max(16px, env(safe-area-inset-left, 0px));
+  padding-block: 0 calc(96px + env(safe-area-inset-bottom, 0px));
+}
+.wrap { max-width: 560px; margin-inline: auto; display: grid; gap: 20px; }
+header.top { padding-top: calc(20px + env(safe-area-inset-top, 0px)); display: grid; gap: 4px; }
+.eyebrow { font: 500 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--char); }
+h1 { font: 700 34px/1.05 var(--display); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+h2 { font: 700 21px/1.2 var(--display); margin: 0; text-wrap: balance; }
+h3 { font: 600 15px/1.3 var(--body); margin: 0; }
+p { margin: 0; }
+.muted { color: var(--ink-2); }
+.small { font-size: 14px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Tab bar */
+nav.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
+}
+nav.tabs .inner { max-width: 560px; margin-inline: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+nav.tabs button {
+  appearance: none; border: 0; background: transparent; color: var(--ink-2);
+  font: 600 14px/1.2 var(--body); padding: 10px 4px; border-radius: 10px; cursor: pointer;
+}
+nav.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+section.panel { display: grid; gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 14px; }
+
+/* Form controls */
+.field { display: grid; gap: 6px; }
+.field label, .lbl { font: 500 12px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stepper { display: grid; grid-template-columns: 44px 1fr 44px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.stepper button { appearance: none; border: 0; background: var(--surface-2); color: var(--ink); font: 500 22px/1 var(--body); cursor: pointer; }
+.stepper input { border: 0; text-align: center; min-width: 0; background: transparent; color: var(--ink); font: 500 20px/1 var(--mono); padding: 10px 0; }
+input[type="datetime-local"], input[type="number"].plain, select {
+  width: 100%; min-width: 0; font: 500 17px/1.2 var(--body); color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px;
+}
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: 500 14px/1.2 var(--body); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border-radius: 12px; padding: 4px; gap: 4px; }
+.seg button { appearance: none; border: 0; background: transparent; color: var(--ink-2); border-radius: 9px; padding: 9px 6px; font: 600 14px/1.2 var(--body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+
+/* Summary */
+.total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.total .big { font: 700 44px/1 var(--display); letter-spacing: -.02em; }
+.total .big small { font: 500 18px/1 var(--mono); color: var(--ink-2); margin-left: 4px; }
+
+/* Ingredient tables */
+.ingr { display: grid; gap: 4px; }
+.ingr .day { display: flex; justify-content: space-between; align-items: baseline; padding-top: 6px; }
+.ingr ul { list-style: none; margin: 0; padding: 0; }
+.ingr li { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.ingr li:last-child { border-bottom: 0; }
+.ingr .amt { font: 500 19px/1 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ingr .amt span { font-size: 14px; color: var(--ink-2); margin-left: 3px; }
+.ingr .sub { display: block; font-size: 13px; color: var(--ink-2); }
+.pct { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pct div { background: var(--surface-2); border-radius: 10px; padding: 10px; display: grid; gap: 2px; }
+.pct b { font: 500 18px/1.1 var(--mono); }
+.pct span { font: 500 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+
+.note { background: var(--warn-bg); color: var(--warn-ink); border-radius: 12px; padding: 12px 14px; font-size: 14px; display: grid; gap: 4px; }
+.note b { font-weight: 600; }
+
+/* Durations */
+.dur { display: grid; gap: 10px; }
+.dur .d { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; }
+.dur .d .t { font-size: 15px; }
+.dur .d .r { font-size: 12px; color: var(--ink-2); grid-column: 1; }
+.dur .d .v { grid-row: 1 / span 2; grid-column: 2; display: flex; align-items: center; gap: 6px; }
+.dur .d input { width: 72px; text-align: right; font: 500 17px/1 var(--mono); padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.dur .d .unit { font: 500 13px/1 var(--mono); color: var(--ink-2); width: 26px; }
+details.card summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+details.card summary::-webkit-details-marker { display: none; }
+details.card summary::after { content: "+"; font: 500 20px/1 var(--mono); color: var(--ink-2); }
+details.card[open] summary::after { content: "–"; }
+
+/* Now bar */
+.now { background: var(--accent); color: var(--accent-ink); border-radius: var(--radius); padding: 16px; display: grid; gap: 4px; }
+.now .lbl { color: inherit; opacity: .8; }
+.now .what { font: 700 20px/1.2 var(--display); }
+.now .when { font: 500 15px/1.3 var(--mono); }
+
+/* Timeline */
+ol.tl { list-style: none; margin: 0; padding: 0; display: grid; }
+ol.tl > li.dayhead { padding: 18px 0 8px; font: 500 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--char); }
+ol.tl > li.dayhead:first-child { padding-top: 0; }
+ol.tl > li.step { display: grid; grid-template-columns: 58px 22px 1fr; gap: 0 10px; }
+.tl .time { font: 500 17px/1.3 var(--mono); font-variant-numeric: tabular-nums; padding-top: 2px; text-align: right; }
+.tl .rail { position: relative; display: flex; justify-content: center; }
+.tl .rail::before { content: ""; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--line); }
+.tl li.step:first-of-type .rail::before { top: 12px; }
+.tl li.step.last .rail::before { bottom: calc(100% - 12px); }
+.tl .dot { position: relative; margin-top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
+.tl li.step.wait .dot { border-style: dashed; border-color: var(--ink-2); }
+.tl li.step.current .dot { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.tl li.step.done .dot { background: var(--done); border-color: var(--done); }
+.tl .body { padding-bottom: 18px; display: grid; gap: 6px; min-width: 0; }
+.tl .head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.tl .head h3 { font-size: 16px; }
+.tl li.step.done .head h3, .tl li.step.done .time { color: var(--done); text-decoration: line-through; text-decoration-thickness: 1px; }
+.tl .meta { font: 500 12px/1.3 var(--mono); color: var(--ink-2); }
+.tl .instr { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 15px; }
+.tl .instr b { font-family: var(--mono); font-weight: 500; }
+.tl .check { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 999px; padding: 4px 10px; font: 500 12px/1.2 var(--body); cursor: pointer; white-space: nowrap; }
+.tl li.step.done .check { background: var(--accent-soft); color: var(--ink); border-color: var(--accent); }
+.tl .pill { display: inline-block; font: 500 11px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 4px 7px; border-radius: 6px; background: var(--surface-2); color: var(--ink-2); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { appearance: none; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); border-radius: 12px; padding: 12px 16px; font: 600 15px/1.2 var(--body); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.toast { font-size: 14px; color: var(--accent); min-height: 1.2em; }
+
+/* Recipe */
+.recipe ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.recipe h3 { font: 700 17px/1.2 var(--display); }
+footer { font-size: 13px; color: var(--ink-2); text-align: center; padding-top: 8px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+<!--/ART-HEAD-->
+</head>
+<body>
+<!--ART-BODY-->
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Tvådagarsdeg · 70 % hydrering</span>
+    <h1>Napoletana-degen</h1>
+    <p class="muted small">Degkalkylator och tidsplan för napolitansk pizzadeg med lång kall jäsning.</p>
+  </header>
+
+  <!-- ===== DEG ===== -->
+  <section class="panel" id="p-deg" role="tabpanel" aria-labelledby="t-deg">
+    <div class="card">
+      <div class="row2">
+        <div class="field">
+          <label for="balls">Antal bollar</label>
+          <div class="stepper">
+            <button type="button" data-step="balls" data-d="-1" aria-label="Färre bollar">−</button>
+            <input id="balls" type="number" inputmode="numeric" min="1" max="40" step="1" value="6">
+            <button type="button" data-step="balls" data-d="1" aria-label="Fler bollar">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="weight">Vikt per boll (g)</label>
+          <div class="stepper">
+            <button type="button" data-step="weight" data-d="-10" aria-label="Minska vikt">−</button>
+            <input id="weight" type="number" inputmode="numeric" min="150" max="450" step="5" value="290">
+            <button type="button" data-step="weight" data-d="10" aria-label="Öka vikt">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="chips" role="group" aria-label="Snabbval bollvikt">
+        <button type="button" class="chip" data-w="260">260 g (receptets rubrik)</button>
+        <button type="button" class="chip" data-w="290">290 g (receptets vikter)</button>
+      </div>
+      <div class="total">
+        <div>
+          <div class="lbl">Total degvikt</div>
+          <div class="big num" id="totalW">1743<small>g</small></div>
+        </div>
+        <div class="muted small num" id="factor">Faktor 1,00 × receptet</div>
+      </div>
+    </div>
+
+    <div class="card ingr" id="ingr"></div>
+
+    <div class="pct" aria-label="Bagarprocent">
+      <div><b id="pHyd">70 %</b><span>Hydrering</span></div>
+      <div><b id="pSalt">3,0 %</b><span>Salt</span></div>
+      <div><b id="pYeast">1,3 %</b><span>Färsk jäst</span></div>
+    </div>
+
+    <div class="note">
+      <b>Om jästen dag 2</b>
+      <p>Receptet anger att jästmängden dag 2 justeras efter vilotiden i rumstemperatur före bak: vid ca 2 timmar ingen extra jäst utöver grundmängden, vid upp till 5 timmar något mer. Receptet anger inte hur mycket mer, så kalkylatorn visar grundmängden.</p>
+    </div>
+  </section>
+
+  <!-- ===== SCHEMA ===== -->
+  <section class="panel" id="p-schema" role="tabpanel" aria-labelledby="t-schema" hidden>
+    <div class="card">
+      <div class="seg" role="group" aria-label="Planeringsläge">
+        <button type="button" id="modeBack" aria-pressed="true">Räkna från baktid</button>
+        <button type="button" id="modeFwd" aria-pressed="false">Räkna från start</button>
+      </div>
+      <div class="field">
+        <label for="anchor" id="anchorLbl">Pizzan ska gräddas</label>
+        <input id="anchor" type="datetime-local" step="300">
+      </div>
+      <p class="small muted" id="span"></p>
+    </div>
+
+    <div class="now" id="now" hidden>
+      <span class="lbl" id="nowLbl">Nästa steg</span>
+      <span class="what" id="nowWhat"></span>
+      <span class="when" id="nowWhen"></span>
+    </div>
+
+    <ol class="tl" id="tl"></ol>
+
+    <div class="note" id="spanNote" hidden></div>
+
+    <details class="card" id="durCard">
+      <summary>Justera tider</summary>
+      <div class="dur" id="dur"></div>
+      <p class="small muted">Tider märkta ”uppskattning” anges inte i receptet. De är rimliga utgångsvärden som du kan ändra.</p>
+      <div><button type="button" class="btn ghost" id="resetDur">Återställ receptets tider</button></div>
+    </details>
+
+    <div class="card">
+      <h2>Påminnelser</h2>
+      <p class="small muted" id="calHelp">Lägg in stegen i iPhone-kalendern så får du en påminnelse när varje fas ska börja.</p>
+      <div class="actions">
+        <a class="btn" id="icsBtn" href="#">Lägg till i kalendern</a>
+        <button type="button" class="btn ghost" id="copyBtn">Kopiera tidsplanen</button>
+        <button type="button" class="btn ghost" id="clearChecks">Nollställ bockar</button>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <textarea id="copyFallback" hidden readonly rows="8" style="width:100%;font:13px/1.4 var(--mono);background:var(--surface-2);color:var(--ink);border:0;border-radius:10px;padding:10px"></textarea>
+    </div>
+  </section>
+
+  <!-- ===== RECEPT ===== -->
+  <section class="panel recipe" id="p-recept" role="tabpanel" aria-labelledby="t-recept" hidden>
+    <div class="card">
+      <h2>Originalreceptet</h2>
+      <p class="muted small">Klassisk tvådagars pizzadeg med lång kall jäsning. Ger 6 degbollar à ca 260 g.</p>
+      <div class="ingr">
+        <ul>
+          <li><span>Vetemjöl (00 eller pizzamjöl)</span><span class="amt">1000<span>g</span></span></li>
+          <li><span>Vatten, rumstempererat (grunddegen)</span><span class="amt">500<span>ml</span></span></li>
+          <li><span>Färsk jäst (grunddegen)</span><span class="amt">10<span>g</span></span></li>
+          <li><span>Vatten (dag 2)</span><span class="amt">200<span>ml</span></span></li>
+          <li><span>Färsk jäst (dag 2)</span><span class="amt">3<span>g</span></span></li>
+          <li><span>Salt</span><span class="amt">30<span>g</span></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Dag 1 – Grunddeg</h3>
+      <ol>
+        <li>Häll upp vattnet (500 ml) i en bunke och rör ut jästen (10 g) i vattnet.</li>
+        <li>Tillsätt mjölet (1000 g) och blanda ihop till en jämn deg.</li>
+        <li>Lägg degen i en bunke med lock och låt vila i kylskåp i 12–16 timmar.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Dag 2 – Färdigställning och bollning</h3>
+      <ol>
+        <li>Ta fram degen 2–5 timmar innan den ska bakas, beroende på önskad jäsningsgrad.</li>
+        <li>Bryt isär degen i mindre bitar i en bunke.</li>
+        <li>Rör ut jästen (3 g) i hälften av vattnet (200 ml) och häll över degbitarna. Låt stå en stund.</li>
+        <li>Tillsätt saltet (30 g) och resten av vattnet. Blanda ihop degen ordentligt.</li>
+        <li>Vik ihop degen och låt den vila under lock i ca 10 minuter.</li>
+        <li>Dela upp degen i 6 bollar à ca 260 g. Rulla och vik ihop varje boll så att den blir väl sluten.</li>
+        <li>Låt bollarna vila i rumstemperatur i ca 1 timme.</li>
+        <li>Flytta därefter bollarna till kylskåp i 3–4 timmar.</li>
+        <li>Ta ut degbollarna och grädda pizzan.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Anteckningar</h3>
+      <p class="small">Jästmängd dag 2 justeras efter hur länge degen vilar i rumstemperatur innan bak: vid ca 2 timmars vila tillsätts ingen extra jäst utöver grundmängden, vid upp till 5 timmars vila tillsätts något mer jäst.</p>
+      <p class="small">Summan av vikterna (mjöl, vatten, jäst, salt) blir ca 1743 g deg. Med 6 bollar motsvarar det ca 290 g per boll snarare än 260 g. Välj bollvikt i kalkylatorn.</p>
+    </div>
+  </section>
+
+  <footer>Inställningar sparas i den här webbläsaren.</footer>
+</div>
+
+<nav class="tabs" role="tablist" aria-label="Vyer">
+  <div class="inner">
+    <button type="button" role="tab" id="t-deg" aria-controls="p-deg" aria-selected="true" data-tab="deg">Deg</button>
+    <button type="button" role="tab" id="t-schema" aria-controls="p-schema" aria-selected="false" data-tab="schema">Tidsplan</button>
+    <button type="button" role="tab" id="t-recept" aria-controls="p-recept" aria-selected="false" data-tab="recept">Recept</button>
+  </div>
+</nav>
+
+<script>
+(function () {
+  "use strict";
+  var IS_ARTIFACT = !!window.IS_ARTIFACT;
+
+  // ---------- Receptdata (från originalreceptet) ----------
+  var BASE = { flour: 1000, water1: 500, yeast1: 10, water2: 200, yeast2: 3, salt: 30 };
+  var BASE_TOTAL = 1743; // summa av vikterna ovan (1 ml vatten ≈ 1 g)
+
+  // Faser. src: "recept" = tid anges i receptet, "uppsk" = uppskattning.
+  var PHASES = [
+    { id: "mix1", day: 1, title: "Blanda grunddegen", min: 15, unit: "min", src: "uppsk", range: "", kind: "work",
+      instr: function (a) { return [
+        "Häll upp vattnet (<b>" + a.water1 + " ml</b>) i en bunke och rör ut jästen (<b>" + a.yeast1 + " g</b>).",
+        "Tillsätt mjölet (<b>" + a.flour + " g</b>) och blanda till en jämn deg.",
+        "Lägg degen i en bunke med lock och ställ in i kylskåpet."
+      ]; } },
+    { id: "cold", day: 1, title: "Kall jäsning i kylskåp", min: 14 * 60, unit: "h", src: "recept", range: "12–16 h", kind: "wait",
+      instr: function () { return ["Degen vilar under lock i kylskåpet."]; } },
+    { id: "take", day: 2, title: "Ta fram degen och tillsätt jäst", min: 10, unit: "min", src: "uppsk", range: "”en stund”", kind: "work",
+      instr: function (a) { return [
+        "Bryt isär degen i mindre bitar i en bunke.",
+        "Rör ut jästen (<b>" + a.yeast2 + " g</b>) i hälften av vattnet (<b>" + a.water2h + " ml</b>) och häll över degbitarna.",
+        "Låt stå en stund."
+      ]; } },
+    { id: "salt", day: 2, title: "Salt och resten av vattnet", min: 10, unit: "min", src: "uppsk", range: "", kind: "work",
+      instr: function (a) { return [
+        "Tillsätt saltet (<b>" + a.salt + " g</b>) och resten av vattnet (<b>" + a.water2h + " ml</b>).",
+        "Blanda ihop degen ordentligt."
+      ]; } },
+    { id: "fold", day: 2, title: "Vik och låt vila", min: 10, unit: "min", src: "recept", range: "ca 10 min", kind: "wait",
+      instr: function () { return ["Vik ihop degen och låt den vila under lock."]; } },
+    { id: "ball", day: 2, title: "Dela och rulla bollar", min: 15, unit: "min", src: "uppsk", range: "", kind: "work",
+      instr: function (a) { return [
+        "Dela degen i <b>" + a.balls + " bollar à ca " + a.weight + " g</b>.",
+        "Rulla och vik ihop varje boll så att den blir väl sluten."
+      ]; } },
+    { id: "room", day: 2, title: "Bollarna vilar i rumstemperatur", min: 60, unit: "min", src: "recept", range: "ca 1 h", kind: "wait",
+      instr: function () { return ["Låt bollarna vila i rumstemperatur, gärna övertäckta."]; } },
+    { id: "fridge", day: 2, title: "Bollarna i kylskåp", min: 210, unit: "h", src: "recept", range: "3–4 h", kind: "wait",
+      instr: function () { return ["Flytta bollarna till kylskåpet."]; } }
+  ];
+  var DEFAULT_MIN = {};
+  PHASES.forEach(function (p) { DEFAULT_MIN[p.id] = p.min; });
+
+  // ---------- Lagring ----------
+  var KEY = "napoletana-degen-v1";
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  var state = load();
+  state.balls = clampInt(state.balls, 1, 40, 6);
+  state.weight = clampInt(state.weight, 150, 450, 290);
+  state.mode = state.mode === "fwd" ? "fwd" : "back";
+  state.dur = state.dur || {};
+  state.checks = state.checks || {};
+  state.tab = state.tab || "deg";
+  if (!state.anchor) state.anchor = defaultAnchor();
+
+  function clampInt(v, lo, hi, d) { v = parseInt(v, 10); if (isNaN(v)) return d; return Math.min(hi, Math.max(lo, v)); }
+  function durOf(p) { var v = state.dur[p.id]; return (typeof v === "number" && v >= 0) ? v : p.min; }
+
+  function defaultAnchor() {
+    // Standard: i morgon kl 19:00 om vi räknar bakåt
+    var d = new Date(); d.setDate(d.getDate() + 1); d.setHours(19, 0, 0, 0);
+    return toLocalInput(d);
+  }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function toLocalInput(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function fromLocalInput(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s || "");
+    if (!m) return null;
+    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], 0, 0);
+  }
+
+  // ---------- Formattering ----------
+  var fmtNum = function (v, dec) { return v.toLocaleString("sv-SE", { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
+  var DAYS = ["sön", "mån", "tis", "ons", "tor", "fre", "lör"];
+  var MONTHS = ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+  function hm(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function dayLabel(d) { return DAYS[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()]; }
+  function durText(min) {
+    var h = Math.floor(min / 60), m = Math.round(min % 60);
+    if (!h) return m + " min";
+    return h + " h" + (m ? " " + m + " min" : "");
+  }
+  function roundTo(v, step) { return Math.round(v / step) * step; }
+  function yeastRound(v) { return v < 10 ? Math.round(v * 10) / 10 : Math.round(v); }
+  function fmtYeast(v) { return v < 10 ? fmtNum(v, 1) : fmtNum(v, 0); }
+
+  // ---------- Beräkning ----------
+  function amounts() {
+    var total = state.balls * state.weight;
+    var f = total / BASE_TOTAL;
+    var w2 = roundTo(BASE.water2 * f, 5);
+    return {
+      f: f, total: total, balls: state.balls, weight: state.weight,
+      flour: roundTo(BASE.flour * f, 5),
+      water1: roundTo(BASE.water1 * f, 5),
+      yeast1: fmtYeast(yeastRound(BASE.yeast1 * f)),
+      water2: w2,
+      water2h: fmtNum(w2 / 2, w2 % 10 ? 1 : 0),
+      yeast2: fmtYeast(yeastRound(BASE.yeast2 * f)),
+      salt: Math.round(BASE.salt * f)
+    };
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function renderDeg() {
+    var a = amounts();
+    $("balls").value = state.balls;
+    $("weight").value = state.weight;
+    $("totalW").innerHTML = fmtNum(a.total, 0) + "<small>g</small>";
+    $("factor").textContent = "Faktor " + fmtNum(a.f, 2) + " × receptet";
+    document.querySelectorAll(".chip[data-w]").forEach(function (c) {
+      c.setAttribute("aria-pressed", String(+c.dataset.w === state.weight));
+    });
+    $("ingr").innerHTML =
+      '<div class="day"><h2>Dag 1 · Grunddeg</h2></div><ul>' +
+      li("Vetemjöl", "00 eller pizzamjöl", a.flour, "g") +
+      li("Vatten", "rumstempererat", a.water1, "ml") +
+      li("Färsk jäst", "", a.yeast1, "g") +
+      '</ul><div class="day"><h2>Dag 2 · Färdigställning</h2></div><ul>' +
+      li("Vatten", "hälften med jästen, hälften med saltet (" + a.water2h + " + " + a.water2h + " ml)", a.water2, "ml") +
+      li("Färsk jäst", "grundmängd, se notering nedan", a.yeast2, "g") +
+      li("Salt", "", a.salt, "g") +
+      "</ul>";
+    var water = BASE.water1 + BASE.water2;
+    $("pHyd").textContent = fmtNum(water / BASE.flour * 100, 0) + " %";
+    $("pSalt").textContent = fmtNum(BASE.salt / BASE.flour * 100, 1) + " %";
+    $("pYeast").textContent = fmtNum((BASE.yeast1 + BASE.yeast2) / BASE.flour * 100, 1) + " %";
+  }
+  function li(name, sub, v, unit) {
+    return "<li><span>" + name + (sub ? '<span class="sub">' + sub + "</span>" : "") + '</span><span class="amt">' +
+      (typeof v === "number" ? fmtNum(v, 0) : v) + "<span>" + unit + "</span></span></li>";
+  }
+
+  function schedule() {
+    var anchor = fromLocalInput(state.anchor) || fromLocalInput(defaultAnchor());
+    var total = PHASES.reduce(function (s, p) { return s + durOf(p); }, 0);
+    var t = state.mode === "back" ? new Date(anchor.getTime() - total * 60000) : new Date(anchor.getTime());
+    var steps = PHASES.map(function (p) {
+      var start = new Date(t.getTime());
+      t = new Date(t.getTime() + durOf(p) * 60000);
+      return { p: p, start: start, end: new Date(t.getTime()) };
+    });
+    steps.push({ p: { id: "bake", day: 2, title: "Grädda pizzan", kind: "work", instr: function () { return ["Ta ut degbollarna och grädda pizzan."]; } }, start: new Date(t.getTime()), end: new Date(t.getTime()) });
+    return steps;
+  }
+
+  function renderSchema() {
+    var a = amounts();
+    var steps = schedule();
+    var back = state.mode === "back";
+    $("modeBack").setAttribute("aria-pressed", String(back));
+    $("modeFwd").setAttribute("aria-pressed", String(!back));
+    $("anchorLbl").textContent = back ? "Pizzan ska gräddas" : "Start dag 1 (blanda grunddegen)";
+    if ($("anchor").value !== state.anchor) $("anchor").value = state.anchor;
+
+    var first = steps[0].start, bake = steps[steps.length - 1].start;
+    $("span").textContent = "Start " + dayLabel(first) + " kl " + hm(first) + " · Gräddning " + dayLabel(bake) + " kl " + hm(bake) + " · Totalt " + durText((bake - first) / 60000) + ".";
+
+    // Tid från uttag till bak jämfört med receptets 2–5 h
+    var take = steps.filter(function (s) { return s.p.id === "take"; })[0];
+    var outMin = (bake - take.start) / 60000;
+    var note = $("spanNote");
+    note.hidden = false;
+    note.innerHTML = "<b>Från uttag till bak: " + durText(outMin) + "</b><p>Receptet anger 2–5 timmar mellan uttag ur kylen och bak, men stegen dag 2 (vila ca 1 h plus 3–4 h i kyl) summerar till mer än så. Kortare tid i kylen dag 2 ger kortare total tid.</p>";
+    if (outMin <= 300) note.hidden = true;
+
+    var now = Date.now();
+    var html = "", lastDay = null, curIdx = -1;
+    steps.forEach(function (s, i) {
+      if (curIdx < 0 && !state.checks[s.p.id] && s.end.getTime() + (s.p.id === "bake" ? 3600000 : 0) > now) curIdx = i;
+    });
+    steps.forEach(function (s, i) {
+      var dkey = s.start.toDateString();
+      if (dkey !== lastDay) {
+        html += '<li class="dayhead">' + dayLabel(s.start) + (s.p.day ? " · Dag " + s.p.day : "") + "</li>";
+        lastDay = dkey;
+      }
+      var done = !!state.checks[s.p.id];
+      var cls = "step" + (s.p.kind === "wait" ? " wait" : "") + (done ? " done" : "") + (i === curIdx ? " current" : "") + (i === steps.length - 1 ? " last" : "");
+      var meta = "";
+      if (s.p.id !== "bake") {
+        var dm = durOf(s.p);
+        meta = durText(dm) + " · klar " + hm(s.end) + (s.p.range ? " · recept: " + s.p.range : "") + (s.p.src === "uppsk" ? " · uppskattning" : "");
+      }
+      html += '<li class="' + cls + '"><span class="time">' + hm(s.start) + '</span><span class="rail"><span class="dot"></span></span>' +
+        '<div class="body"><div class="head"><h3>' + s.p.title + '</h3><button type="button" class="check" data-check="' + s.p.id + '" aria-pressed="' + done + '">' + (done ? "Klar" : "Markera klar") + "</button></div>" +
+        (meta ? '<span class="meta">' + meta + "</span>" : "") +
+        '<ul class="instr">' + s.p.instr(a).map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul></div></li>";
+    });
+    $("tl").innerHTML = html;
+
+    // Nu / nästa
+    var nowBox = $("now");
+    if (curIdx >= 0) {
+      var c = steps[curIdx];
+      var running = c.start.getTime() <= now;
+      nowBox.hidden = false;
+      $("nowLbl").textContent = running ? "Pågår nu" : "Nästa steg";
+      $("nowWhat").textContent = c.p.title;
+      if (running) {
+        $("nowWhen").textContent = c.p.id === "bake" ? "Dags att grädda" : "Klart kl " + hm(c.end) + " (om " + durText(Math.max(0, Math.round((c.end - now) / 60000))) + ")";
+      } else {
+        $("nowWhen").textContent = dayLabel(c.start) + " kl " + hm(c.start) + " (om " + durText(Math.round((c.start - now) / 60000)) + ")";
+      }
+    } else {
+      nowBox.hidden = true;
+    }
+
+    renderDur();
+  }
+
+  function renderDur() {
+    var box = $("dur");
+    if (box.dataset.built) {
+      PHASES.forEach(function (p) {
+        var inp = $("d-" + p.id);
+        if (document.activeElement !== inp) inp.value = p.unit === "h" ? fmtNum(durOf(p) / 60, 1).replace(",0", "") : durOf(p);
+      });
+      return;
+    }
+    box.dataset.built = "1";
+    box.innerHTML = PHASES.map(function (p) {
+      var v = p.unit === "h" ? String(durOf(p) / 60).replace(".", ",") : durOf(p);
+      return '<div class="d"><label class="t" for="d-' + p.id + '">' + p.title + '</label><span class="r">' +
+        (p.src === "recept" ? "Recept: " + p.range : "Uppskattning" + (p.range ? " (recept: " + p.range + ")" : "")) +
+        '</span><span class="v"><input id="d-' + p.id + '" data-dur="' + p.id + '" type="text" inputmode="decimal" value="' + v + '"><span class="unit">' + p.unit + "</span></span></div>";
+    }).join("");
+  }
+
+  // ---------- Kalender (.ics) och kopiering ----------
+  function icsDate(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "T" + pad(d.getHours()) + pad(d.getMinutes()) + "00"; }
+  function icsEsc(s) { return s.replace(/<[^>]+>/g, "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n"); }
+  function buildIcs() {
+    var a = amounts(), steps = schedule(), stamp = icsDate(new Date());
+    var out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Napoletana-degen//SV", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+    steps.forEach(function (s, i) {
+      var end = s.p.id === "bake" ? new Date(s.start.getTime() + 30 * 60000) : s.end;
+      out.push("BEGIN:VEVENT", "UID:" + stamp + "-" + i + "-napoletana", "DTSTAMP:" + stamp,
+        "DTSTART:" + icsDate(s.start), "DTEND:" + icsDate(end),
+        "SUMMARY:" + icsEsc("Pizzadeg: " + s.p.title),
+        "DESCRIPTION:" + icsEsc(s.p.instr(a).join("\n")),
+        "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + icsEsc(s.p.title), "TRIGGER:PT0M", "END:VALARM",
+        "END:VEVENT");
+    });
+    out.push("END:VCALENDAR");
+    return out.join("\r\n");
+  }
+  function planText() {
+    var a = amounts(), steps = schedule(), lines = ["Napoletana-degen: " + a.balls + " bollar à " + a.weight + " g", ""], last = null;
+    steps.forEach(function (s) {
+      var k = s.start.toDateString();
+      if (k !== last) { lines.push(dayLabel(s.start).toUpperCase()); last = k; }
+      lines.push(hm(s.start) + "  " + s.p.title);
+      s.p.instr(a).forEach(function (x) { lines.push("       - " + x.replace(/<[^>]+>/g, "")); });
+    });
+    return lines.join("\n");
+  }
+  function toast(msg) { var t = $("toast"); t.textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(function () { t.textContent = ""; }, 3500); }
+
+  // ---------- Flikar ----------
+  function setTab(tab) {
+    state.tab = tab; save();
+    document.querySelectorAll("nav.tabs button").forEach(function (b) {
+      var on = b.dataset.tab === tab;
+      b.setAttribute("aria-selected", String(on));
+      $("p-" + b.dataset.tab).hidden = !on;
+    });
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- Händelser ----------
+  document.querySelectorAll("nav.tabs button").forEach(function (b) { b.addEventListener("click", function () { setTab(b.dataset.tab); }); });
+  document.querySelectorAll("[data-step]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var k = b.dataset.step, d = +b.dataset.d;
+      if (k === "balls") state.balls = clampInt(state.balls + d, 1, 40, 6);
+      else state.weight = clampInt(state.weight + d, 150, 450, 290);
+      save(); renderAll();
+    });
+  });
+  ["balls", "weight"].forEach(function (k) {
+    $(k).addEventListener("change", function () {
+      state[k] = k === "balls" ? clampInt(this.value, 1, 40, 6) : clampInt(this.value, 150, 450, 290);
+      save(); renderAll();
+    });
+  });
+  document.querySelectorAll(".chip[data-w]").forEach(function (c) {
+    c.addEventListener("click", function () { state.weight = +c.dataset.w; save(); renderAll(); });
+  });
+  $("modeBack").addEventListener("click", function () { switchMode("back"); });
+  $("modeFwd").addEventListener("click", function () { switchMode("fwd"); });
+  function switchMode(m) {
+    if (m === state.mode) return;
+    // Behåll samma schema: konvertera ankartiden
+    var steps = schedule();
+    var d = m === "back" ? steps[steps.length - 1].start : steps[0].start;
+    state.mode = m; state.anchor = toLocalInput(d); save(); renderSchema();
+  }
+  $("anchor").addEventListener("change", function () { if (this.value) { state.anchor = this.value; save(); renderSchema(); } });
+  $("dur").addEventListener("change", function (e) {
+    var id = e.target.dataset.dur; if (!id) return;
+    var p = PHASES.filter(function (x) { return x.id === id; })[0];
+    var v = parseFloat(String(e.target.value).replace(",", "."));
+    if (isNaN(v) || v < 0) { renderDur(); return; }
+    state.dur[id] = Math.round(p.unit === "h" ? v * 60 : v);
+    save(); renderSchema();
+  });
+  $("resetDur").addEventListener("click", function () { state.dur = {}; save(); $("dur").dataset.built = ""; renderSchema(); toast("Tiderna är återställda."); });
+  $("tl").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-check]"); if (!b) return;
+    var id = b.dataset.check; state.checks[id] = !state.checks[id]; save(); renderSchema();
+  });
+  $("clearChecks").addEventListener("click", function () { state.checks = {}; save(); renderSchema(); toast("Alla steg är omarkerade."); });
+  $("icsBtn").addEventListener("click", function (e) {
+    if (IS_ARTIFACT) { e.preventDefault(); return; }
+    this.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(buildIcs());
+  });
+  $("copyBtn").addEventListener("click", function () {
+    var txt = planText(), fb = $("copyFallback");
+    function fallback() { fb.hidden = false; fb.value = txt; fb.focus(); fb.select(); toast("Markera texten och kopiera."); }
+    try {
+      navigator.clipboard.writeText(txt).then(function () { fb.hidden = true; toast("Tidsplanen är kopierad."); }, fallback);
+    } catch (err) { fallback(); }
+  });
+
+  if (IS_ARTIFACT) {
+    $("icsBtn").hidden = true;
+    $("calHelp").textContent = "Kopiera tidsplanen och klistra in den i Anteckningar eller Påminnelser. Kalenderexport finns i versionen som installeras på hemskärmen.";
+  }
+
+  function renderAll() { renderDeg(); renderSchema(); }
+  renderAll();
+  setTab(["deg", "schema", "recept"].indexOf(state.tab) >= 0 ? state.tab : "deg");
+  setInterval(function () { if (!$("p-schema").hidden) renderSchema(); }, 30000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) renderSchema(); });
+
+  if (!IS_ARTIFACT && "serviceWorker" in navigator && location.protocol === "https:") {
+    try { navigator.serviceWorker.register("sw.js").catch(function () {}); } catch (e) {}
+  }
+})();
+</script>
+<!--/ART-BODY-->
+</body>
+</html>
