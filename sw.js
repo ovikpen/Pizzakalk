@@ -1,5 +1,5 @@
 // Enkel offline-cache: appen fungerar utan nät när den väl har laddats en gång.
-const CACHE = "napoletana-v1";
+const CACHE = "napoletana-v2";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-512.png"];
 
 self.addEventListener("install", (e) => {

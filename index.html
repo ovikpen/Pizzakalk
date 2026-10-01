@@ -349,7 +349,7 @@ footer { font-size: 13px; color: var(--ink-2); text-align: center; padding-top: 
         <li>Dela upp degen i 6 bollar à ca 260 g. Rulla och vik ihop varje boll så att den blir väl sluten.</li>
         <li>Låt bollarna vila i rumstemperatur i ca 1 timme.</li>
         <li>Flytta därefter bollarna till kylskåp i 3–4 timmar.</li>
-        <li>Ta ut degbollarna och grädda pizzan.</li>
+        <li>Ta ut degbollarna ur kylskåpet 1 timme innan bakning. Grädda sedan pizzan.</li>
       </ol>
     </div>
     <div class="card">
@@ -410,7 +410,9 @@ footer { font-size: 13px; color: var(--ink-2); text-align: center; padding-top: 
     { id: "room", day: 2, title: "Bollarna vilar i rumstemperatur", min: 60, unit: "min", src: "recept", range: "ca 1 h", kind: "wait",
       instr: function () { return ["Låt bollarna vila i rumstemperatur, gärna övertäckta."]; } },
     { id: "fridge", day: 2, title: "Bollarna i kylskåp", min: 210, unit: "h", src: "recept", range: "3–4 h", kind: "wait",
-      instr: function () { return ["Flytta bollarna till kylskåpet."]; } }
+      instr: function () { return ["Flytta bollarna till kylskåpet."]; } },
+    { id: "out", day: 2, title: "Ta ut bollarna ur kylskåpet", min: 60, unit: "min", src: "recept", range: "1 h före bak", kind: "wait",
+      instr: function () { return ["Ta ut degbollarna ur kylskåpet och låt dem stå övertäckta i rumstemperatur fram till bakning."]; } }
   ];
   var DEFAULT_MIN = {};
   PHASES.forEach(function (p) { DEFAULT_MIN[p.id] = p.min; });
@@ -516,7 +518,7 @@ footer { font-size: 13px; color: var(--ink-2); text-align: center; padding-top: 
       t = new Date(t.getTime() + durOf(p) * 60000);
       return { p: p, start: start, end: new Date(t.getTime()) };
     });
-    steps.push({ p: { id: "bake", day: 2, title: "Grädda pizzan", kind: "work", instr: function () { return ["Ta ut degbollarna och grädda pizzan."]; } }, start: new Date(t.getTime()), end: new Date(t.getTime()) });
+    steps.push({ p: { id: "bake", day: 2, title: "Grädda pizzan", kind: "work", instr: function () { return ["Grädda pizzan."]; } }, start: new Date(t.getTime()), end: new Date(t.getTime()) });
     return steps;
   }
 
@@ -537,7 +539,7 @@ footer { font-size: 13px; color: var(--ink-2); text-align: center; padding-top: 
     var outMin = (bake - take.start) / 60000;
     var note = $("spanNote");
     note.hidden = false;
-    note.innerHTML = "<b>Från uttag till bak: " + durText(outMin) + "</b><p>Receptet anger 2–5 timmar mellan uttag ur kylen och bak, men stegen dag 2 (vila ca 1 h plus 3–4 h i kyl) summerar till mer än så. Kortare tid i kylen dag 2 ger kortare total tid.</p>";
+    note.innerHTML = "<b>Från uttag till bak: " + durText(outMin) + "</b><p>Receptet anger 2–5 timmar mellan uttag ur kylen och bak, men stegen dag 2 (vila ca 1 h, 3–4 h i kyl och 1 h i rumstemperatur före bak) summerar till mer än så. Kortare tid i kylen dag 2 ger kortare total tid.</p>";
     if (outMin <= 300) note.hidden = true;
 
     var now = Date.now();
